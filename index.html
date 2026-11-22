@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>勾選項目並存至 Google 雲端硬碟</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      max-width: 760px;
+      margin: 32px auto;
+      padding: 0 16px;
+      background: #f6f8fa;
+      color: #1f2328;
+    }
+    .box {
+      background: #fff;
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    label.url-row {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    input[type="text"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px 12px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      font-size: 13px;
+      background: #e8edec;
+      color: #5b686d;
+      cursor: not-allowed;
+    }
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .item-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .item-card:hover {
+      background: #f9fafb;
+    }
+    .meta {
+      font-size: 12px;
+      color: #57606a;
+      margin-top: 3px;
+    }
+    button {
+      padding: 9px 14px;
+      border-radius: 6px;
+      border: 1px solid #d0d7de;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    button.primary {
+      background: #1f883d;
+      border-color: #1f883d;
+      color: #fff;
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    #status {
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.6;
+      background: #f6f8fa;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2 style="margin-top:0;">勾選相簿／項目 → 直接存入 Google 雲端硬碟</h2>
+    <label class="url-row" for="gasUrl">Google Apps Script 網頁應用程式網址（系統已鎖定）</label>
+    <input
+      id="gasUrl"
+      type="text"
+      value="https://script.google.com/macros/s/AKfycbw1uOeRTr9T-G30jsQDnWSxYmOoYX3t0kZvi3li65s6VWR-PrhoBUTkqbj6H94QAkmA/exec"
+      readonly
+    />
+  </div>
+
+  <div class="box">
+    <div class="toolbar">
+      <button type="button" id="btnSelectAll">全選</button>
+      <button type="button" id="btnClearAll">取消全選</button>
+      <button type="button" class="primary" id="btnSaveCloud">將勾選項目存入 Google 雲端硬碟</button>
+    </div>
+
+    <div id="itemList"></div>
+  </div>
+
+  <div class="box">
+    <strong>執行狀態</strong>
+    <div id="status">已鎖定雲端端點。請勾選至少一個項目後點擊「將勾選項目存入 Google 雲端硬碟」。</div>
+  </div>
+
+  <script>
+    const OFFICIAL_GAS_URL = "https://script.google.com/macros/s/AKfycbw1uOeRTr9T-G30jsQDnWSxYmOoYX3t0kZvi3li65s6VWR-PrhoBUTkqbj6H94QAkmA/exec";
+
+    // 範例資料（實務上可替換為您的實際相簿／照片陣列）
+    const SAMPLE_ITEMS = [
+      {
+        id: "alb_01",
+        album: "A工程_施工相簿",
+        title: "開工前現況勘查紀錄",
+        fileName: "A工程_開工前現況.txt",
+        note: "包含現場標示與工區範圍說明"
+      },
+      {
+        id: "alb_02",
+        album: "A工程_施工相簿",
+        title: "安全圍籬與交維設施檢查",
+        fileName: "A工程_交維檢查.txt",
+        note: "警示燈與防溢座確認"
+      },
+      {
+        id: "alb_03",
+        album: "B工程_材料抽查",
+        title: "混凝土坍度與試體紀錄",
+        fileName: "B工程_坍度紀錄.txt",
+        note: "依規範辦理取樣紀錄"
+      }
+    ];
+
+    const listEl = document.getElementById("itemList");
+    const statusEl = document.getElementById("status");
+    const btnSaveCloud = document.getElementById("btnSaveCloud");
+
+    function renderItems() {
+      listEl.innerHTML = SAMPLE_ITEMS.map((item, idx) => `
+        <label class="item-card">
+          <input type="checkbox" class="item-cb" data-index="${idx}" />
+          <div>
+            <div><strong>${item.title}</strong></div>
+            <div class="meta">子資料夾：${item.album}｜檔名：${item.fileName}</div>
+          </div>
+        </label>
+      `).join("");
+    }
+
+    document.getElementById("btnSelectAll").addEventListener("click", () => {
+      document.querySelectorAll(".item-cb").forEach(cb => { cb.checked = true; });
+    });
+
+    document.getElementById("btnClearAll").addEventListener("click", () => {
+      document.querySelectorAll(".item-cb").forEach(cb => { cb.checked = false; });
+    });
+
+    btnSaveCloud.addEventListener("click", async () => {
+      const selectedItems = [];
+      document.querySelectorAll(".item-cb:checked").forEach(cb => {
+        const idx = Number(cb.dataset.index);
+        selectedItems.push(SAMPLE_ITEMS[idx]);
+      });
+
+      if (selectedItems.length === 0) {
+        statusEl.textContent = "⚠️ 請先勾選至少一個項目（單選或多選皆可）。";
+        return;
+      }
+
+      btnSaveCloud.disabled = true;
+      statusEl.textContent = `⏳ 正在將 ${selectedItems.length} 個勾選項目傳送至 Google 雲端硬碟...`;
+
+      try {
+        const response = await fetch(OFFICIAL_GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ items: selectedItems })
+        });
+
+        const result = await response.json();
+        if (result.status === "success") {
+          const lines = (result.files || []).map(f => `• [${f.folder}] ${f.name}`);
+          statusEl.textContent = `✅ 成功存入 ${result.count} 個檔案至 Google 雲端硬碟：\n${lines.join("\n")}`;
+        } else {
+          statusEl.textContent = `❌ 雲端回傳錯誤：${result.message || "未知錯誤"}`;
+        }
+      } catch (err) {
+        statusEl.textContent = `❌ 連線失敗：${err.message || err}`;
+      } finally {
+        btnSaveCloud.disabled = false;
+      }
+    });
+
+    renderItems();
+  </script>
+</body>
+</html>
