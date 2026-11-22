@@ -3,39 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>勾選項目並存至 Google 雲端硬碟</title>
+  <title>工程群組照片 AI 智慧分類中心</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
-      max-width: 760px;
-      margin: 32px auto;
+      max-width: 820px;
+      margin: 28px auto;
       padding: 0 16px;
-      background: #f6f8fa;
-      color: #1f2328;
+      background: #f2f4f3;
+      color: #1c2427;
     }
-    .box {
+    .card {
       background: #fff;
-      border: 1px solid #d0d7de;
+      border: 1px solid #d5dddd;
       border-radius: 10px;
       padding: 20px;
       margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
-    label.url-row {
+    h2 {
+      margin: 0 0 8px 0;
+      color: #1f5f73;
+      font-size: 20px;
+    }
+    .sub {
+      font-size: 13px;
+      color: #5b686d;
+      margin-bottom: 14px;
+    }
+    label.field-label {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      color: #1c2427;
     }
     input[type="text"] {
       width: 100%;
       box-sizing: border-box;
       padding: 9px 12px;
-      border: 1px solid #d0d7de;
+      border: 1px solid #cbd5d5;
       border-radius: 6px;
-      font-size: 13px;
-      background: #e8edec;
-      color: #5b686d;
-      cursor: not-allowed;
+      font-size: 14px;
     }
     .toolbar {
       display: flex;
@@ -43,169 +52,260 @@
       flex-wrap: wrap;
       margin-bottom: 14px;
     }
-    .item-card {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-    .item-card:hover {
-      background: #f9fafb;
-    }
-    .meta {
-      font-size: 12px;
-      color: #57606a;
-      margin-top: 3px;
-    }
     button {
       padding: 9px 14px;
       border-radius: 6px;
-      border: 1px solid #d0d7de;
+      border: 1px solid #cbd5d5;
       background: #fff;
+      color: #1c2427;
       cursor: pointer;
       font-size: 14px;
       font-weight: 600;
     }
+    button:hover:not(:disabled) {
+      background: #f4f7f7;
+    }
     button.primary {
-      background: #1f883d;
-      border-color: #1f883d;
+      background: #1f5f73;
+      border-color: #1f5f73;
+      color: #fff;
+    }
+    button.primary:hover:not(:disabled) {
+      background: #184b5b;
+    }
+    button.stop {
+      background: #b83a2d;
+      border-color: #b83a2d;
       color: #fff;
     }
     button:disabled {
-      opacity: 0.55;
+      opacity: 0.5;
       cursor: not-allowed;
     }
-    #status {
+    .group-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid #e1e7e7;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    .group-row:hover {
+      background: #f8fafa;
+    }
+    .group-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .badge {
+      font-size: 12px;
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-weight: 600;
+      background: #e6f0f3;
+      color: #1f5f73;
+    }
+    .badge.done {
+      background: #e3f3ea;
+      color: #2b7a4b;
+    }
+    #logBox {
       white-space: pre-wrap;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.6;
-      background: #f6f8fa;
+      background: #f8fafa;
       padding: 12px;
       border-radius: 8px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #e1e7e7;
+      max-height: 280px;
+      overflow-y: auto;
     }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h2 style="margin-top:0;">勾選相簿／項目 → 直接存入 Google 雲端硬碟</h2>
-    <label class="url-row" for="gasUrl">Google Apps Script 網頁應用程式網址（系統已鎖定）</label>
-    <input
-      id="gasUrl"
-      type="text"
-      value="https://script.google.com/macros/s/AKfycbw1uOeRTr9T-G30jsQDnWSxYmOoYX3t0kZvi3li65s6VWR-PrhoBUTkqbj6H94QAkmA/exec"
-      readonly
-    />
+  <div class="card">
+    <h2>工程群組照片 AI 智慧分類中心</h2>
+    <div class="sub">自動同步大資料庫最新新增的工程群組，勾選後交由 Gemini AI 看圖分類並歸檔至目標雲端硬碟。</div>
+
+    <label class="field-label" for="categoriesInput">AI 分類標籤（以逗號分隔，可自由增減）</label>
+    <input id="categoriesInput" type="text" value="橋梁, 排水, 路面與坑洞, 護欄與交維, 邊坡, 其他" />
   </div>
 
-  <div class="box">
+  <div class="card">
     <div class="toolbar">
+      <button type="button" id="btnRefresh">🔄 重新讀取最新群組</button>
       <button type="button" id="btnSelectAll">全選</button>
       <button type="button" id="btnClearAll">取消全選</button>
-      <button type="button" class="primary" id="btnSaveCloud">將勾選項目存入 Google 雲端硬碟</button>
+      <button type="button" class="primary" id="btnStartAI">🤖 開始 AI 智慧分類</button>
+      <button type="button" class="stop" id="btnStopAI" style="display:none;">⏹ 停止執行</button>
     </div>
 
-    <div id="itemList"></div>
+    <div id="groupList">正在從雲端大資料庫讀取最新工程群組...</div>
   </div>
 
-  <div class="box">
-    <strong>執行狀態</strong>
-    <div id="status">已鎖定雲端端點。請勾選至少一個項目後點擊「將勾選項目存入 Google 雲端硬碟」。</div>
+  <div class="card">
+    <strong>執行進度與分類紀錄</strong>
+    <div id="logBox">等待操作。請勾選上方的工程群組後點擊「開始 AI 智慧分類」。</div>
   </div>
 
   <script>
-    const OFFICIAL_GAS_URL = "https://script.google.com/macros/s/AKfycbw1uOeRTr9T-G30jsQDnWSxYmOoYX3t0kZvi3li65s6VWR-PrhoBUTkqbj6H94QAkmA/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbw1uOeRTr9T-G30jsQDnWSxYmOoYX3t0kZvi3li65s6VWR-PrhoBUTkqbj6H94QAkmA/exec";
 
-    // 範例資料（實務上可替換為您的實際相簿／照片陣列）
-    const SAMPLE_ITEMS = [
-      {
-        id: "alb_01",
-        album: "A工程_施工相簿",
-        title: "開工前現況勘查紀錄",
-        fileName: "A工程_開工前現況.txt",
-        note: "包含現場標示與工區範圍說明"
-      },
-      {
-        id: "alb_02",
-        album: "A工程_施工相簿",
-        title: "安全圍籬與交維設施檢查",
-        fileName: "A工程_交維檢查.txt",
-        note: "警示燈與防溢座確認"
-      },
-      {
-        id: "alb_03",
-        album: "B工程_材料抽查",
-        title: "混凝土坍度與試體紀錄",
-        fileName: "B工程_坍度紀錄.txt",
-        note: "依規範辦理取樣紀錄"
+    let loadedGroups = [];
+    let isRunning = false;
+    let stopRequested = false;
+
+    const groupListEl = document.getElementById("groupList");
+    const logBoxEl = document.getElementById("logBox");
+    const btnRefresh = document.getElementById("btnRefresh");
+    const btnStartAI = document.getElementById("btnStartAI");
+    const btnStopAI = document.getElementById("btnStopAI");
+
+    function appendLog(msg) {
+      logBoxEl.textContent += "\n" + msg;
+      logBoxEl.scrollTop = logBoxEl.scrollHeight;
+    }
+
+    async function loadGroups() {
+      btnRefresh.disabled = true;
+      groupListEl.innerHTML = "⏳ 正在掃描大資料庫最新群組資料夾...";
+
+      try {
+        const res = await fetch(`${GAS_URL}?action=listGroups`);
+        const data = await res.json();
+
+        if (data.status !== "success") {
+          groupListEl.innerHTML = `❌ 讀取失敗：${data.message || "未知錯誤"}`;
+          return;
+        }
+
+        loadedGroups = data.groups || [];
+        if (loadedGroups.length === 0) {
+          groupListEl.innerHTML = "目前大資料庫底下尚無任何群組子資料夾。";
+          return;
+        }
+
+        groupListEl.innerHTML = loadedGroups.map((g, idx) => {
+          const allDone = g.totalImages > 0 && g.unclassifiedImages === 0;
+          const badgeClass = allDone ? "badge done" : "badge";
+          const badgeText = g.totalImages === 0
+            ? "無照片"
+            : (allDone ? `已全部分類 (${g.totalImages} 張)` : `待分類 ${g.unclassifiedImages} / 共 ${g.totalImages} 張`);
+
+          return `
+            <label class="group-row">
+              <div class="group-left">
+                <input type="checkbox" class="grp-cb" data-index="${idx}" ${g.unclassifiedImages > 0 ? "" : ""} />
+                <strong>${g.name}</strong>
+              </div>
+              <span class="${badgeClass}">${badgeText}</span>
+            </label>
+          `;
+        }).join("");
+
+      } catch (err) {
+        groupListEl.innerHTML = `❌ 連線失敗：${err.message || err}`;
+      } finally {
+        btnRefresh.disabled = false;
       }
-    ];
-
-    const listEl = document.getElementById("itemList");
-    const statusEl = document.getElementById("status");
-    const btnSaveCloud = document.getElementById("btnSaveCloud");
-
-    function renderItems() {
-      listEl.innerHTML = SAMPLE_ITEMS.map((item, idx) => `
-        <label class="item-card">
-          <input type="checkbox" class="item-cb" data-index="${idx}" />
-          <div>
-            <div><strong>${item.title}</strong></div>
-            <div class="meta">子資料夾：${item.album}｜檔名：${item.fileName}</div>
-          </div>
-        </label>
-      `).join("");
     }
 
     document.getElementById("btnSelectAll").addEventListener("click", () => {
-      document.querySelectorAll(".item-cb").forEach(cb => { cb.checked = true; });
+      document.querySelectorAll(".grp-cb").forEach(cb => { cb.checked = true; });
     });
 
     document.getElementById("btnClearAll").addEventListener("click", () => {
-      document.querySelectorAll(".item-cb").forEach(cb => { cb.checked = false; });
+      document.querySelectorAll(".grp-cb").forEach(cb => { cb.checked = false; });
     });
 
-    btnSaveCloud.addEventListener("click", async () => {
-      const selectedItems = [];
-      document.querySelectorAll(".item-cb:checked").forEach(cb => {
-        const idx = Number(cb.dataset.index);
-        selectedItems.push(SAMPLE_ITEMS[idx]);
+    btnRefresh.addEventListener("click", loadGroups);
+
+    btnStopAI.addEventListener("click", () => {
+      stopRequested = true;
+      appendLog("⚠️ 已送出停止指令，將在目前這一批完成後暫停...");
+    });
+
+    btnStartAI.addEventListener("click", async () => {
+      const selectedIds = [];
+      const selectedNames = [];
+      document.querySelectorAll(".grp-cb:checked").forEach(cb => {
+        const g = loadedGroups[Number(cb.dataset.index)];
+        if (g) {
+          selectedIds.push(g.id);
+          selectedNames.push(g.name);
+        }
       });
 
-      if (selectedItems.length === 0) {
-        statusEl.textContent = "⚠️ 請先勾選至少一個項目（單選或多選皆可）。";
+      if (selectedIds.length === 0) {
+        logBoxEl.textContent = "⚠️ 請先勾選至少一個工程群組。";
         return;
       }
 
-      btnSaveCloud.disabled = true;
-      statusEl.textContent = `⏳ 正在將 ${selectedItems.length} 個勾選項目傳送至 Google 雲端硬碟...`;
+      const categories = document.getElementById("categoriesInput").value
+        .split(/[,，、]/)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      isRunning = true;
+      stopRequested = false;
+      btnStartAI.disabled = true;
+      btnRefresh.disabled = true;
+      btnStopAI.style.display = "inline-block";
+
+      logBoxEl.textContent = `🚀 開始針對【${selectedNames.join("、")}】進行 AI 智慧分類...`;
+
+      let totalProcessed = 0;
 
       try {
-        const response = await fetch(OFFICIAL_GAS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ items: selectedItems })
-        });
+        while (!stopRequested) {
+          const res = await fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+              groupIds: selectedIds,
+              categories: categories,
+              batchSize: 8
+            })
+          });
 
-        const result = await response.json();
-        if (result.status === "success") {
-          const lines = (result.files || []).map(f => `• [${f.folder}] ${f.name}`);
-          statusEl.textContent = `✅ 成功存入 ${result.count} 個檔案至 Google 雲端硬碟：\n${lines.join("\n")}`;
-        } else {
-          statusEl.textContent = `❌ 雲端回傳錯誤：${result.message || "未知錯誤"}`;
+          const result = await res.json();
+          if (result.status !== "success") {
+            appendLog(`❌ 執行發生錯誤：${result.message || "未知錯誤"}`);
+            break;
+          }
+
+          totalProcessed += result.processed || 0;
+          if (Array.isArray(result.logs) && result.logs.length > 0) {
+            result.logs.forEach(line => appendLog("  • " + line));
+          }
+
+          if (result.remaining > 0 && result.processed > 0) {
+            appendLog(`⏳ 本批完成，尚餘約 ${result.remaining} 張待分類，自動接續下一批...`);
+          } else {
+            appendLog(`✅ 全部完成！本次共為您智慧分類並歸檔 ${totalProcessed} 張照片。`);
+            break;
+          }
+        }
+
+        if (stopRequested) {
+          appendLog(`⏹ 已手動停止。本次已累積完成 ${totalProcessed} 張照片分類。`);
         }
       } catch (err) {
-        statusEl.textContent = `❌ 連線失敗：${err.message || err}`;
+        appendLog(`❌ 連線中斷：${err.message || err}`);
       } finally {
-        btnSaveCloud.disabled = false;
+        isRunning = false;
+        btnStartAI.disabled = false;
+        btnRefresh.disabled = false;
+        btnStopAI.style.display = "none";
+        loadGroups(); // 重新更新各群組剩餘待分類張數
       }
     });
 
-    renderItems();
+    loadGroups();
   </script>
 </body>
 </html>
